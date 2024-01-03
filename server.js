@@ -1,6 +1,5 @@
 // src/index.js
 const express = require('express');
-const bodyParser = require('body-parser');
 //const pusher = require('pusher');
 const { PrismaClient } = require('@prisma/client');
 const cors = require('cors');
@@ -9,7 +8,6 @@ const app = express();
 const db = new PrismaClient();
 const port = process.env.PORT || 3000;
 
-app.use(bodyParser.json());
 app.use(cors());
 
 /* // Pusher configuration
