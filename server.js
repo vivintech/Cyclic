@@ -3,12 +3,16 @@ const express = require('express');
 //const pusher = require('pusher');
 const { PrismaClient } = require('@prisma/client');
 const cors = require('cors');
+const sirv = require('sirv');
+const { createServer } = require('http');
+const { resolve } = require('path');
 
 const app = express();
 const db = new PrismaClient();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 app.use(cors());
+app.use(sirv(resolve(__dirname, 'public')));
 
 /* // Pusher configuration
 const pusherConfig = {
@@ -26,8 +30,11 @@ module.exports = { db, pusherConfig }; */
 // Initializing routes by requiring routes.js
  require('./routes')(app, db);
 
+ // Create an HTTP server and listen on the specified port
+const server = createServer(app);
+
 
 // Start server
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
