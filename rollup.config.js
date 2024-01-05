@@ -9,10 +9,12 @@ import css from 'rollup-plugin-css-only'; */
 const { spawn } = require('child_process');
 const svelte = require('rollup-plugin-svelte');
 const commonjs = require('@rollup/plugin-commonjs');
+const nodePolyfills = require('rollup-plugin-node-polyfills');
 const terser = require('@rollup/plugin-terser');
 const resolve = require('@rollup/plugin-node-resolve');
 const livereload = require('rollup-plugin-livereload');
 const css = require('rollup-plugin-css-only');
+const json = require('@rollup/plugin-json');
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -67,6 +69,8 @@ module.exports = {
 			exportConditions: ['svelte']
 		}),
 		commonjs(),
+		json(),
+		nodePolyfills(),
 
 		// In dev mode, call `npm run start` once
 		// the bundle has been generated

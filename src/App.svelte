@@ -1,8 +1,10 @@
 <script>
 	import { onMount } from "svelte";
 	import { navigate } from "svelte-routing";
-
+	import JoinedRoom from "./components/joinedRoom.svelte"; // Adjust the path accordingly
 	let roomIdInput = ""; // Input field to get room ID from the user
+	let joinedRoom = false;
+	let roomId = false;
 
 	onMount(() => {
 		console.log("the component has mounted");
@@ -17,11 +19,16 @@
 		try {
 			const response = await fetch(
 				`${window.location.href}rooms/${roomIdInput}`,
-			{ method: "GET" });
+				{ method: "GET" },
+			);
 			const room = await response.json();
 
-			if (room) {
+			if (room.id) {
 				navigateToRoom(room.id);
+				joinedRoom = true; 
+				// Set the flag to show the JoinedRoom component
+				roomId = room.id;
+				// Pusher subscribe, etc.
 			} else {
 				console.error("Room not found");
 				// Handle the case when the room with the given ID is not found
@@ -33,20 +40,29 @@
 	}
 
 	async function createRoom() {
-		const roomId = await fetch(`${window.location.href}api/createRoom`, {
+		const response = await fetch(`${window.location.href}api/createRoom`, {
 			method: "POST",
 		});
-
-		navigateToRoom(roomId); // Navigate to the newly created room
+		const room = await response.json();
+		// Navigate to the newly created room
+		navigateToRoom(room.id); 
+		// Set the flag to show the JoinedRoom component
+		joinedRoom = true;
+		// Set the flag to show the JoinedRoom component
+		roomId = room.id; 
 	}
 </script>
 
 <main>
-	<h1>Der dümmste fliegt!</h1>
-	<label for="roomIdInput">Enter Room ID:</label>
-	<input type="text" id="roomIdInput" bind:value={roomIdInput} />
-	<button on:click={joinRoom}>Join Room</button>
-	<button on:click={createRoom}>Create Room</button>
+	{#if joinedRoom}
+		<JoinedRoom {roomId}/>
+	{:else}
+		<h1>Der dümmste fliegt!</h1>
+		<label for="roomIdInput">Enter Room ID:</label>
+		<input type="text" id="roomIdInput" bind:value={roomIdInput} />
+		<button on:click={joinRoom}>Join Room</button>
+		<button on:click={createRoom}>Create Room</button>
+	{/if}
 </main>
 
 <style>
