@@ -14,6 +14,18 @@
     cluster: "eu",
     useTLS: true,
   });
+  
+  async function fetchQuestions() {
+    try {
+      const response = await fetch(
+        `${window.location.origin}/rooms/${roomId}/questions?batch=${currentBatch}`,
+        { method: "GET" },
+      );
+      questions = await response.json();
+    } catch (error) {
+      console.error("Error fetching questions:", error);
+    }
+  }
 
   onMount(() => {
     // You can perform any initialization here when the component mounts
@@ -29,18 +41,6 @@
 
     fetchQuestions();
   });
-
-  async function fetchQuestions() {
-    try {
-      const response = await fetch(
-        `${window.location.origin}/rooms/${roomId}/questions?batch=${currentBatch}`,
-        { method: "GET" },
-      );
-      questions = await response.json();
-    } catch (error) {
-      console.error("Error fetching questions:", error);
-    }
-  }
 
   function nextBatch() {
     currentBatch += 1;
