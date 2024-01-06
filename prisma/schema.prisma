@@ -28,3 +28,12 @@ model Message {
   chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
   chatRoomId String
 }
+
+model Questions {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  question   String
+  solution   String
+  category   String
+  batch      Int
+}
+

@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from "svelte";
 	import { navigate } from "svelte-routing";
-	import JoinedRoom from "./components/joinedRoom.svelte"; // Adjust the path accordingly
+	import JoinedRoom from "./components/joinedRoom.svelte";
 	let roomIdInput = ""; // Input field to get room ID from the user
 	let joinedRoom = false;
 	let roomId = false;
@@ -25,7 +25,7 @@
 
 			if (room.id) {
 				navigateToRoom(room.id);
-				joinedRoom = true; 
+				joinedRoom = true;
 				// Set the flag to show the JoinedRoom component
 				roomId = room.id;
 				// Pusher subscribe, etc.
@@ -45,17 +45,18 @@
 		});
 		const room = await response.json();
 		// Navigate to the newly created room
-		navigateToRoom(room.id); 
+		navigateToRoom(room.id);
 		// Set the flag to show the JoinedRoom component
 		joinedRoom = true;
 		// Set the flag to show the JoinedRoom component
-		roomId = room.id; 
+		roomId = room.id;
 	}
 </script>
 
+
 <main>
 	{#if joinedRoom}
-		<JoinedRoom {roomId}/>
+		<JoinedRoom {roomId} />
 	{:else}
 		<h1>Der dümmste fliegt!</h1>
 		<label for="roomIdInput">Enter Room ID:</label>

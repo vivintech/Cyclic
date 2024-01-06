@@ -1,6 +1,7 @@
 // src/routes.js
-module.exports = (app, db, pusher) => {
 
+module.exports = (app, db, pusher) => {
+  // GET
   app.get('/rooms/:roomId', async (req, res) => {
     try {
       const room = await db.chatRoom.findUnique({
@@ -18,6 +19,37 @@ module.exports = (app, db, pusher) => {
     }
   });
 
+  app.get('/rooms/:roomId/questions', async (req, res) => {
+    try {
+      const { batch = 1 } = req.query;
+      const batchSize = 50;
+  
+      const questions = await db.questions.findMany({
+        where: { batch: parseInt(batch) },
+        take: batchSize// You can adjust the order field if needed
+      });
+  
+      res.json(questions);
+    } catch (error) {
+      console.error("Error fetching questions from db:", error);
+      res.status(500).json({ error: "Error fetching questions from db" });
+    }
+  });
+
+  app.get('/rooms/:roomId/messages', async (req, res) => {
+    try {
+      const messages = await db.message.findMany({
+        where: { chatRoomId: req.params.roomId },
+      });
+
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages from db:", error);
+      res.status(500).json({ error: "Error fetching messages from db" });
+    }
+  });
+
+  // POST
   app.post('/api/createRoom', async (req, res) => {
     const createdRoom = await db.chatRoom.create({
       data: {},
@@ -42,19 +74,6 @@ module.exports = (app, db, pusher) => {
     } catch (error) {
       console.error("Error handling message:", error);
       res.status(500).json({ error: "Internal Server Error" });
-    }
-  });
-
-  app.get('/rooms/:roomId/messages', async (req, res) => {
-    try {
-      const messages = await db.message.findMany({
-        where: { chatRoomId: req.params.roomId },
-      });
-
-      res.json(messages);
-    } catch (error) {
-      console.error("Error fetching messages from db:", error);
-      res.status(500).json({ error: "Error fetching messages from db" });
     }
   });
 

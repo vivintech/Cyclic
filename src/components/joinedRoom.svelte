@@ -1,10 +1,13 @@
 <script>
   import { onMount, onDestroy } from "svelte";
-  //import pusher from "../lib/pusher";
   import Pusher from "pusher-js";
+
   export let roomId;
   let messageInput;
   let messages = [];
+  let questions = [];
+  let showSolution = false;
+  let currentBatch = 0;
   const pusher = new Pusher("f449e4a0099f05988090", {
     appId: "1733202",
     secret: "aea35c0840f440790a05",
@@ -23,14 +26,27 @@
     pusher.bind("incoming-message", (message) => {
       fetchMessages();
     });
+
+    fetchQuestions();
   });
 
-  /*   onDestroy(() => {
-    // Unsubscribe from the Pusher channel when the component is unmounted
-    if (pusher) {
-      pusher.unsubscribe(roomId);
+  async function fetchQuestions() {
+    try {
+      const response = await fetch(
+        `${window.location.origin}/rooms/${roomId}/questions?batch=${currentBatch}`,
+        { method: "GET" },
+      );
+      questions = await response.json();
+    } catch (error) {
+      console.error("Error fetching questions:", error);
     }
-  }); */
+  }
+
+  function nextBatch() {
+    currentBatch += 1;
+    fetchQuestions();
+    showSolution = false;
+  }
 
   async function fetchMessages() {
     try {
@@ -39,7 +55,6 @@
         { method: "GET" },
       );
       messages = await response.json();
-
 
       // Handle the fetched messages (update UI, etc.)
       console.log("Fetched messages:", messages);
@@ -57,19 +72,19 @@
         {
           method: "POST",
           headers: {
-            'Accept': 'application/json',
-            "Content-Type": "application/json"
+            Accept: "application/json",
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({ messageInput, roomId })
-        });
+          body: JSON.stringify({ messageInput, roomId }),
+        },
+      );
 
       if (!response.ok) {
         // Handle the error, if any
         console.error("Error sending message:", response.statusText);
         return; // Exit early if there is an error
-      } 
+      }
 
-      
       // Clear input field after sending a message
       messageInput = "";
       // Message sent successfully
@@ -80,6 +95,17 @@
       console.error("Error sending message:", response.statusText);
     }
   }
+
+  function leaveRoom() {
+    pusher.unsubscribe(roomId);
+    // After cleanup, navigate to a different route or perform any other actions
+    //navigate("/");
+    location.href = "/";
+  }
+
+  function toggleSolution() {
+    showSolution = !showSolution;
+  }
 </script>
 
 <main>
@@ -87,6 +113,7 @@
   <h1>Welcome to Room {roomId}!</h1>
   <input type="text" id="messageInput" bind:value={messageInput} />
   <button on:click={sendMessage}>Send Message</button>
+  <button on:click={leaveRoom}>Leave Room</button>
   {#if messages.length > 0}
     <ul>
       {#each messages as message (message.id)}
@@ -95,6 +122,25 @@
     </ul>
   {:else}
     <p>No messages available</p>
+  {/if}
+
+  {#if questions.length > 0}
+    <div>
+      <p>Question: {questions[0].question}</p>
+      {#if showSolution}
+      <p>Solution: {questions[0].solution}</p>
+      {/if}
+    </div>
+    <button on:click={toggleSolution}>
+      {#if showSolution}
+        Hide Solution
+      {:else}
+        Show Solution
+      {/if}
+    </button>
+    <button on:click={nextBatch}>Next Question</button>
+  {:else}
+    <p>No questions available</p>
   {/if}
 </main>
 
