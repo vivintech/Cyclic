@@ -4,7 +4,6 @@
   import Pusher from "pusher-js";
   export let roomId;
   let messageInput;
-  let showMessage; // Store received messages
   let messages = [];
   const pusher = new Pusher("f449e4a0099f05988090", {
     appId: "1733202",
@@ -18,13 +17,12 @@
     console.log("JoinedRoom component has mounted");
 
     pusher.subscribe(roomId);
+    fetchMessages();
 
     // Listening to the incoming-message event with pusher which gets triggered via button in MessagField.tsx and pushed in message/route.ts
     pusher.bind("incoming-message", (message) => {
-      showMessage = message;
+      fetchMessages();
     });
-
-    fetchMessages();
   });
 
   /*   onDestroy(() => {
@@ -41,6 +39,7 @@
         { method: "GET" },
       );
       messages = await response.json();
+
 
       // Handle the fetched messages (update UI, etc.)
       console.log("Fetched messages:", messages);
@@ -70,8 +69,11 @@
         return; // Exit early if there is an error
       } 
 
+      
+      // Clear input field after sending a message
+      messageInput = "";
       // Message sent successfully
-      fetchMessages();
+      // fetchMessages();
       console.log("Message sent successfully!");
     } catch (error) {
       // Handle the error, if any
