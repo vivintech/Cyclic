@@ -5,17 +5,17 @@
   export let roomId;
   let messageInput;
   let messages = [];
-  let questions = [];
+/*   let questions = [];
   let showSolution = false;
-  let currentBatch = 0;
+  let currentBatch = 0; */
   const pusher = new Pusher("f449e4a0099f05988090", {
     appId: "1733202",
     secret: "aea35c0840f440790a05",
     cluster: "eu",
-    useTLS: true,
+    useTLS: true
   });
 
-  async function fetchQuestions() {
+/*   async function fetchQuestions() {
     try {
       const response = await fetch(
         `${window.location.origin}/rooms/${roomId}/questions?batch=${currentBatch}`,
@@ -26,7 +26,7 @@
     } catch (error) {
       console.error("Error fetching questions:", error);
     }
-  }
+  } */
 
   onMount(() => {
     // You can perform any initialization here when the component mounts
@@ -40,14 +40,14 @@
       fetchMessages();
     });
 
-    fetchQuestions();
+    // fetchQuestions();
   });
 
-  function nextBatch() {
+/*   function nextBatch() {
     currentBatch += 1;
     fetchQuestions();
     showSolution = false;
-  }
+  } */
 
   async function fetchMessages() {
     try {
@@ -104,9 +104,9 @@
     location.href = "/";
   }
 
-  function toggleSolution() {
+/*   function toggleSolution() {
     showSolution = !showSolution;
-  }
+  } */
 </script>
 
 <main>
@@ -125,7 +125,7 @@
     <p>No messages available</p>
   {/if}
 
-  {#if questions.length > 0}
+<!--   {#if questions.length > 0}
     <div>
       <p>Question: {questions[0].question}</p>
       {#if showSolution}
@@ -142,7 +142,7 @@
     <button on:click={nextBatch}>Next Question</button>
   {:else}
     <p>No questions available</p>
-  {/if}
+  {/if} -->
 </main>
 
 <style>
