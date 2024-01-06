@@ -25,22 +25,37 @@ module.exports = (app, db, pusher) => {
     res.json(createdRoom);
   });
 
-  app.post('/room/:roomId/api/message', async (req, res) => {
+  app.post('/rooms/:roomId/sendMessage', async (req, res) => {
     const { messageInput, roomId } = req.body;
     try {
       pusher.trigger(roomId, 'incoming-message', messageInput);
+
+      // Make chats persistent, works also without it, but only until the page gets refreshed
+      await db.message.create({
+        data: {
+          text: messageInput,
+          chatRoomId: roomId
+        }
+      });
+      // Respond with a success message
+      res.status(200).json({ message: "Message sent and created successfully" });
     } catch (error) {
       console.error("Error handling message:", error);
       res.status(500).json({ error: "Internal Server Error" });
     }
+  });
 
-    // Make chats persistent, works also without it, but only until the page gets refreshed
-    await db.message.create({
-      data: {
-        chatRoomId: roomId,
-        text: messageInput
-      },
-    }) 
+  app.get('/rooms/:roomId/messages', async (req, res) => {
+    try {
+      const messages = await db.message.findMany({
+        where: { chatRoomId: req.params.roomId },
+      });
+
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages from db:", error);
+      res.status(500).json({ error: "Error fetching messages from db" });
+    }
   });
 
 };
