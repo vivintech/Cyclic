@@ -14,7 +14,7 @@
     cluster: "eu",
     useTLS: true,
   });
-  
+
   async function fetchQuestions() {
     try {
       const response = await fetch(
@@ -22,6 +22,7 @@
         { method: "GET" },
       );
       questions = await response.json();
+      console.log(questions[0])
     } catch (error) {
       console.error("Error fetching questions:", error);
     }
