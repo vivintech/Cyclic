@@ -3,22 +3,23 @@
   import Pusher from "pusher-js";
 
   export let roomId;
+  export let roomCreated;
   let messageInput;
   let messages = [];
-  let questions = [];
+  let showQuestion = [];
   let showSolution = false;
-  let currentBatch = 0;
+  let currentBatch;
   const pusher = new Pusher("f449e4a0099f05988090", {
     appId: "1733202",
     secret: "aea35c0840f440790a05",
     cluster: "eu",
-    useTLS: true
+    useTLS: true,
   });
 
-  async function fetchQuestions() {
+  /*   async function fetchQuestion() {
     try {
       const response = await fetch(
-        `${window.location.origin}/rooms/${roomId}/questions?batch=${currentBatch}`,
+        `${window.location.origin}/rooms/${roomId}/questions`,
         { method: "GET" },
       );
       questions = await response.json();
@@ -26,26 +27,65 @@
     } catch (error) {
       console.error("Error fetching questions:", error);
     }
+  } */
+
+  async function fetchCurrentQuestionOfRoom() {
+    try {
+      const response = await fetch(
+        `${window.location.origin}/rooms/${roomId}/question/current`,
+        { method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ roomCreated })
+        }
+      );
+      /* question = await response.json();
+      const currentQuestion = questions[0]; // Get the latest question
+      console.log(currentQuestion); */
+    } catch (error) {
+      console.error("Error fetching questions:", error);
+    }
   }
 
-  onMount(() => {
+  async function fetchNextQuestion() {
+    try {
+      const response = await fetch(
+        `${window.location.origin}/rooms/${roomId}/question/next`,
+        { method: "GET" },
+      );
+      /* question = await response.json();
+      const currentQuestion = questions[0]; // Get the latest question
+      console.log(currentQuestion); */
+    } catch (error) {
+      console.error("Error fetching questions:", error);
+    }
+  }
+
+  onMount(async () => {
     // You can perform any initialization here when the component mounts
     console.log("JoinedRoom component has mounted");
 
-    pusher.subscribe(roomId);
+    const channel = pusher.subscribe(roomId);
     fetchMessages();
 
     // Listening to the incoming-message event with pusher which gets triggered via button in MessagField.tsx and pushed in message/route.ts
-    pusher.bind("incoming-message", (message) => {
+    channel.bind("incoming-message", () => {
       fetchMessages();
     });
 
-    fetchQuestions();
+    // Listening to the incoming-message event with pusher which gets triggered via button in MessagField.tsx and pushed in message/route.ts
+    channel.bind("incoming-question", ({ question, batch }) => {
+      currentBatch = batch;
+      showQuestion = question;
+    });
+
+    await fetchCurrentQuestionOfRoom();
   });
 
-  function nextBatch() {
-    currentBatch += 1;
-    fetchQuestions();
+  function nextQuestion() {
+    fetchNextQuestion();
     showSolution = false;
   }
 
@@ -76,8 +116,8 @@
             Accept: "application/json",
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ messageInput, roomId }),
-        },
+          body: JSON.stringify({ messageInput, roomId })
+        }
       );
 
       if (!response.ok) {
@@ -125,11 +165,11 @@
     <p>No messages available</p>
   {/if}
 
-  {#if questions.length > 0}
+  {#if showQuestion.length > 0}
     <div>
-      <p>Question: {questions[0].question}</p>
+      <p>Question: {showQuestion[0].question}</p>
       {#if showSolution}
-      <p>Solution: {questions[0].solution}</p>
+        <p>Solution: {showQuestion[0].solution}</p>
       {/if}
     </div>
     <button on:click={toggleSolution}>
@@ -139,7 +179,7 @@
         Show Solution
       {/if}
     </button>
-    <button on:click={nextBatch}>Next Question</button>
+    <button on:click={nextQuestion}>Next Question</button>
   {:else}
     <p>No questions available</p>
   {/if}

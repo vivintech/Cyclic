@@ -5,9 +5,10 @@
 	let roomIdInput = ""; // Input field to get room ID from the user
 	let joinedRoom = false;
 	let roomId = false;
+	let roomCreated = false;
 
 	onMount(() => {
-		console.log("the component has mounted");
+		console.log("App component has mounted");
 	});
 
 	function navigateToRoom(roomId) {
@@ -22,6 +23,7 @@
 				{ method: "GET" },
 			);
 			const room = await response.json();
+			roomCreated = false;
 
 			if (room.id) {
 				navigateToRoom(room.id);
@@ -50,13 +52,14 @@
 		joinedRoom = true;
 		// Set the flag to show the JoinedRoom component
 		roomId = room.id;
+		roomCreated = true;
 	}
 </script>
 
 
 <main>
 	{#if joinedRoom}
-		<JoinedRoom {roomId} />
+		<JoinedRoom {roomId} {roomCreated}/>
 	{:else}
 		<h1>Der dümmste fliegt!</h1>
 		<label for="roomIdInput">Enter Room ID:</label>
